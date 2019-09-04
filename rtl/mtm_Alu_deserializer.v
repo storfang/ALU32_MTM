@@ -25,7 +25,7 @@ reg [2:0] state_nxt = IDLE,
           state;
 
 reg [3:0] CRC;
-reg [71:0]  OUT_NXT, // = 72'b111111111111111111111111111111111111111111111111111111111111111111111111,
+reg [71:0]  OUT_NXT = 72'b111111111111111111111111111111111111111111111111111111111111111111111111,
             OUT;
 
 always @(posedge clk)
@@ -51,6 +51,9 @@ always @*
       case(state)
         IDLE:
           begin
+          A = 32'b11111111111111111111111111111111;
+          B = 32'b11111111111111111111111111111111;
+          CTL = 8'b11111111;
           $display("idle   %d", sin);
             if (sin == 0)
               begin
@@ -98,32 +101,23 @@ always @*
           end
       STOP:
           begin
-          $display("stop data");
-            if(bit_counter == 0 && sin == 1)
-              begin
-              $display("1 data");
-                bit_counter_nxt = bit_counter + 1;
-                state_nxt = STOP;
-              end
-            else if (bit_counter == 1 && sin == 0)
-              begin
-                $display("2 data");
-                bit_counter_nxt = 0;
-                if (byte_counter == 8)
-                  begin
-                    state_nxt = SEND;
-                    byte_counter_nxt = 0;
-                  end
-                else
-                  begin
-                    byte_counter_nxt = byte_counter +1;
-                    state_nxt = LOAD;
-                  end
-              end
-            else
-              begin
-                state_nxt = ERROR;
-              end
+          if(sin == 1)
+            begin
+              if (byte_counter == 8)
+                begin
+                  state_nxt = SEND;
+                  byte_counter_nxt = 0;
+                end
+              else
+                begin
+                  state_nxt = IDLE;
+                  byte_counter_nxt = byte_counter +1;
+                end
+            end
+          else
+            begin
+              state_nxt = ERROR;
+            end
           end
       SEND:
 

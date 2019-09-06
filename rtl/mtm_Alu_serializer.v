@@ -13,13 +13,13 @@ localparam IDLE = 3'b000,
            DATA = 3'b011,
            STOP_BIT = 3'b100;
 
-reg [7:0] bit_counter_nxt = 0,
+reg [7:0] bit_counter_nxt,
           bit_counter;
 
-reg [7:0] byte_counter_nxt = 0,
+reg [7:0] byte_counter_nxt,
           byte_counter;
 
-reg [2:0] state_nxt = IDLE,
+reg [2:0] state_nxt,
           state;
 
 reg [31:0] C_buff_nxt,
@@ -28,7 +28,7 @@ reg [31:0] C_buff_nxt,
 reg [7:0]  CTL_buff_nxt,
            CTL_buff;
 
-reg sout_nxt = 1;
+reg sout_nxt;
 
 
 
@@ -60,6 +60,7 @@ always @*
         IDLE:
          begin
          //$display("idle, A = %b  CTL = %b  CTL 7 = %b", C, CTL_out, CTL_out[7]);
+          sout_nxt = 1;
           if (CTL_out[7] == 0)
             begin
             //$display("jestem w 1 ifie");
@@ -80,7 +81,8 @@ always @*
             begin
               //$display("jestem tu");
               state_nxt = IDLE;
-              sout_nxt = 1;
+              bit_counter_nxt = 0;
+              byte_counter_nxt = 0;
             end
          end
         START_BIT:
@@ -115,7 +117,7 @@ always @*
             end
           else
             begin
-              sout_nxt = C_buff[ ((byte_counter - 1) * 8) - bit_counter];
+              sout_nxt = C_buff[ ((byte_counter - 1)  * 8) - bit_counter - 1];
             end
           if (bit_counter == 7)
             begin

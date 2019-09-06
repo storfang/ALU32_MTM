@@ -16,15 +16,15 @@ localparam IDLE = 3'b000,
            SEND = 3'b100,
            ERROR = 3'b101;
 
-reg [3:0] bit_counter_nxt = 0,
+reg [3:0] bit_counter_nxt,
           bit_counter;
-reg [4:0] byte_counter_nxt = 0,
+reg [4:0] byte_counter_nxt,
           byte_counter;
 
-reg       crc_error_nxt = 0,
+reg       crc_error_nxt,
           crc_error;
 
-reg       op_error_nxt = 0,
+reg       op_error_nxt,
           op_error;
 
 reg [31:0] A_nxt,
@@ -47,6 +47,7 @@ always @(posedge clk)
           bit_counter <= 0;
           byte_counter <= 0;
           crc_error <= 0;
+          op_error <= 0;
           Buff <= 72'b111111111111111111111111111111111111111111111111111111111111111111111111;
         end
       else

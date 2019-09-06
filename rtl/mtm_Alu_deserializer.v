@@ -21,28 +21,45 @@ reg [3:0] bit_counter_nxt = 0,
 reg [4:0] byte_counter_nxt = 0,
           byte_counter;
 
+reg       crc_error_nxt = 0,
+          crc_error;
+
+reg       op_error_nxt = 0,
+          op_error;
+
+reg [31:0] A_nxt,
+           B_nxt;
+
+reg [7:0]  CTL_nxt;
+
 reg [2:0] state_nxt = IDLE,
           state;
 
 reg [3:0] CRC;
-reg [71:0]  OUT_NXT = 72'b111111111111111111111111111111111111111111111111111111111111111111111111,
-            OUT;
+reg [71:0]  Buff_nxt = 72'b111111111111111111111111111111111111111111111111111111111111111111111111,
+            Buff;
 
 always @(posedge clk)
     begin
       if (!rst_n)
         begin
           state <= IDLE;
-          bit_counter_nxt <= 0;
-          byte_counter_nxt <= 0;
-          OUT_NXT <= 72'b111111111111111111111111111111111111111111111111111111111111111111111111;
+          bit_counter <= 0;
+          byte_counter <= 0;
+          crc_error <= 0;
+          Buff <= 72'b111111111111111111111111111111111111111111111111111111111111111111111111;
         end
       else
         begin
           state <= state_nxt;
           bit_counter <= bit_counter_nxt;
           byte_counter <= byte_counter_nxt;
-          OUT <= OUT_NXT;
+          Buff <= Buff_nxt;
+          crc_error <= crc_error_nxt;
+          op_error <= op_error_nxt;
+          A <= A_nxt;
+          B <= B_nxt;
+          CTL <= CTL_nxt;
         end
     end
 
@@ -51,10 +68,10 @@ always @*
       case(state)
         IDLE:
           begin
-          A = 32'b11111111111111111111111111111111;
-          B = 32'b11111111111111111111111111111111;
-          CTL = 8'b11111111;
-          $display("idle   %d", sin);
+          A_nxt = 32'b11111111111111111111111111111111;
+          B_nxt = 32'b11111111111111111111111111111111;
+          CTL_nxt = 8'b11111111;
+          //$display("idle   %d", sin);
             if (sin == 0)
               begin
                 state_nxt = LOAD;
@@ -66,7 +83,7 @@ always @*
           end
       LOAD:
           begin
-          $display("load, %d%d", sin, byte_counter);
+          //$display("load, %d%d", sin, byte_counter);
             if (byte_counter != 8 && sin == 0)
               begin
                 state_nxt = LOAD_DATA;
@@ -82,8 +99,8 @@ always @*
           end
       LOAD_DATA:
           begin
-          $display("load data, %d  %d     %b", bit_counter, sin, OUT);
-            OUT_NXT = {OUT,sin};
+          //$display("load data, %d  %d     %b", bit_counter, sin, Buff);
+            Buff_nxt = {Buff,sin};
             if (bit_counter == 7)
               begin
                 state_nxt = STOP;
@@ -120,23 +137,30 @@ always @*
             end
           end
       SEND:
-
         begin
-
+          byte_counter_nxt = 0;
           bit_counter_nxt = 0;
-          CRC = makeCRC({OUT[71:40],OUT[39:8],1'b1,OUT[6:4]},4'b0000);
-          $display("send data   %b %b", CRC, OUT);
-          if (CRC == OUT[3:0])
+          CRC = makeCRC({Buff[71:40],Buff[39:8],1'b1,Buff[6:4]},4'b0000);
+          $display("send data   %b %b", CRC, Buff);
+          if (CRC == Buff[3:0])
             begin
-              state_nxt = IDLE;
-              B = OUT[71:40];
-              A = OUT[39:8];
-              CTL = OUT[7:0];
-              byte_counter_nxt = 0;
+              if (Buff[6:4]==3'b000 || Buff[6:4]==3'b001 || Buff[6:4]==3'b100 || Buff[6:4]==3'b101)
+               begin
+                state_nxt = IDLE;
+                B_nxt = Buff[71:40];
+                A_nxt = Buff[39:8];
+                CTL_nxt = Buff[7:0];
+                $display("send data   CTL = %b POWINNO = %b", CTL_nxt, Buff[7:0]);
+               end
+              else
+               begin
+                op_error_nxt = 1;
+                state_nxt = ERROR;
+               end
             end
           else
             begin
-              byte_counter_nxt = 15;
+              crc_error_nxt = 1;
               state_nxt = ERROR;
             end
 
@@ -144,17 +168,23 @@ always @*
      ERROR:
         begin
         $display("error data");
+          crc_error_nxt = 0;
+          op_error_nxt = 0;
           state_nxt = IDLE;
           byte_counter_nxt = 0;
           bit_counter_nxt = 0;
-          OUT_NXT = 72'b111111111111111111111111111111111111111111111111111111111111111111111111;
-          if (byte_counter != 15)
+          Buff_nxt = 72'b111111111111111111111111111111111111111111111111111111111111111111111111;
+          if (crc_error == 0 && op_error == 0)
             begin
-              CTL = 8'b11001001;  // data error
+              CTL_nxt = 8'b11001001;  // data error
             end
-          else
+          else if (crc_error == 1)
             begin
-              CTL = 8'b10100101; // crc error
+              CTL_nxt = 8'b10100101; // crc error
+            end
+          else if (op_error == 1)
+            begin
+              CTL_nxt = 8'b10010011;
             end
           end
       endcase

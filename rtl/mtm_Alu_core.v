@@ -37,8 +37,8 @@ always @(posedge clk)
  begin
   if (!rst_n)
     begin
-      CTL_out_nxt = 8'b11111111;
-      C_nxt = 32'b0;
+      CTL_out <= 8'b11111111;
+      C <= 32'b0;
     end
   else
     begin
@@ -50,7 +50,7 @@ end
 
 always @*
       begin
-        if( CTL_in == 8'b10100101 || CTL_in == 8'b11001001)
+        if( CTL_in == 8'b10100101 || CTL_in == 8'b11001001 || CTL_in == 8'b10010011)
           begin
           $display("error data");
             CTL_out_nxt = CTL_in;
@@ -76,14 +76,7 @@ always @*
             endcase
             Zero = (C_nxt == 0);
 						Negative = C_nxt[31];
-            if (OP == AND || OP == OR || OP == ADD || OP == SUB )
-              begin
-                CTL_out_nxt = {1'b0,Carry,Overflow,Zero,Negative,makeCRC({C_nxt,1'b0,Carry,Overflow,Zero,Negative},4'b0000)};
-              end
-            else
-              begin
-                CTL_out_nxt = 8'b10010011;
-              end
+            CTL_out_nxt = {1'b0,Carry,Overflow,Zero,Negative,makeCRC({C_nxt,1'b0,Carry,Overflow,Zero,Negative},4'b0000)};
           end
         else
           begin

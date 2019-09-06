@@ -12,7 +12,7 @@ localparam IDLE = 3'b000,
            PACKET_BIT = 3'b010,
            DATA = 3'b011,
            STOP_BIT = 3'b100;
-           
+
 reg [7:0] bit_counter_nxt = 0,
           bit_counter;
 
@@ -22,8 +22,11 @@ reg [7:0] byte_counter_nxt = 0,
 reg [2:0] state_nxt = IDLE,
           state;
 
-reg [31:0] C_buff;
-reg [7:0] CTL_buff;
+reg [31:0] C_buff_nxt,
+           C_buff;
+
+reg [7:0]  CTL_buff_nxt,
+           CTL_buff;
 
 
 
@@ -32,8 +35,8 @@ always @(posedge clk)
       if (!rst_n)
         begin
           state_nxt <= IDLE;
-          bit_counter_nxt <= 0;
-          byte_counter_nxt <= 0;
+          bit_counter <= 0;
+          byte_counter <= 0;
           C_buff <= 0;
           CTL_buff <= 0;
         end
@@ -42,6 +45,8 @@ always @(posedge clk)
           state <= state_nxt;
           bit_counter <= bit_counter_nxt;
           byte_counter <= byte_counter_nxt;
+          C_buff <= C_buff_nxt;
+          CTL_buff <= CTL_buff_nxt;
         end
 end
 
@@ -56,16 +61,16 @@ always @*
             //$display("jestem w 1 ifie");
               state_nxt = START_BIT;
               byte_counter_nxt = 5;
-              C_buff = C;
-              CTL_buff = CTL_in;
+              C_buff_nxt = C;
+              CTL_buff_nxt = CTL_in;
             end
           else if (CTL_in == 8'b11001001 || CTL_in == 8'b10010011 || CTL_in == 8'b10100101)
             begin
             $display("jestem w 2 ifie");
               state_nxt = START_BIT;
               byte_counter_nxt = 1;
-              C_buff = C;
-              CTL_buff = CTL_in;
+              C_buff_nxt = C;
+              CTL_buff_nxt = CTL_in;
             end
           else
             begin

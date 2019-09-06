@@ -2,7 +2,7 @@ module mtm_Alu_serializer(
   input  wire clk,
   input  wire rst_n,
   input wire [31:0] C,
-  input wire [7:0] CTL_in,
+  input wire [7:0] CTL_out,
 
   output reg sout
 );
@@ -28,17 +28,20 @@ reg [31:0] C_buff_nxt,
 reg [7:0]  CTL_buff_nxt,
            CTL_buff;
 
+reg sout_nxt = 1;
+
 
 
 always @(posedge clk)
     begin
       if (!rst_n)
         begin
-          state_nxt <= IDLE;
+          state <= IDLE;
           bit_counter <= 0;
           byte_counter <= 0;
           C_buff <= 0;
           CTL_buff <= 0;
+          sout <= 1;
         end
       else
         begin
@@ -47,6 +50,7 @@ always @(posedge clk)
           byte_counter <= byte_counter_nxt;
           C_buff <= C_buff_nxt;
           CTL_buff <= CTL_buff_nxt;
+          sout <= sout_nxt;
         end
 end
 
@@ -55,28 +59,28 @@ always @*
       case(state)
         IDLE:
          begin
-         //$display("idle, A = %b  CTL = %b  CTL 7 = %b", C, CTL_in, CTL_in[7]);
-          if (CTL_in[7] == 0)
+         //$display("idle, A = %b  CTL = %b  CTL 7 = %b", C, CTL_out, CTL_out[7]);
+          if (CTL_out[7] == 0)
             begin
             //$display("jestem w 1 ifie");
               state_nxt = START_BIT;
               byte_counter_nxt = 5;
               C_buff_nxt = C;
-              CTL_buff_nxt = CTL_in;
+              CTL_buff_nxt = CTL_out;
             end
-          else if (CTL_in == 8'b11001001 || CTL_in == 8'b10010011 || CTL_in == 8'b10100101)
+          else if (CTL_out == 8'b11001001 || CTL_out == 8'b10010011 || CTL_out == 8'b10100101)
             begin
             $display("jestem w 2 ifie");
               state_nxt = START_BIT;
               byte_counter_nxt = 1;
               C_buff_nxt = C;
-              CTL_buff_nxt = CTL_in;
+              CTL_buff_nxt = CTL_out;
             end
           else
             begin
               //$display("jestem tu");
               state_nxt = IDLE;
-              sout = 1;
+              sout_nxt = 1;
             end
          end
         START_BIT:
@@ -84,7 +88,7 @@ always @*
           //$display("start bit");
 
             state_nxt = PACKET_BIT;
-            sout = 0;
+            sout_nxt = 0;
           end
         PACKET_BIT:
          begin
@@ -92,11 +96,11 @@ always @*
 
           if (byte_counter == 1)
             begin
-              sout = 1;
+              sout_nxt = 1;
             end
           else
             begin
-              sout = 0;
+              sout_nxt = 0;
             end
           state_nxt = DATA;
           bit_counter_nxt = 0;
@@ -107,11 +111,11 @@ always @*
 
           if (byte_counter == 1)
             begin
-              sout = CTL_buff[7 - bit_counter];
+              sout_nxt = CTL_buff[7 - bit_counter];
             end
           else
             begin
-              sout = C_buff[ ((byte_counter - 1) * 8) - bit_counter];
+              sout_nxt = C_buff[ ((byte_counter - 1) * 8) - bit_counter];
             end
           if (bit_counter == 7)
             begin
@@ -128,7 +132,7 @@ always @*
           begin
           //$display("STOP bit   %d", byte_counter);
 
-            sout = 1;
+            sout_nxt = 1;
             if (byte_counter == 0)
               begin
                 state_nxt = IDLE;

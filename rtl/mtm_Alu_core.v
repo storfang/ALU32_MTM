@@ -25,10 +25,10 @@ localparam AND = 3'b000,
            ADD = 3'b100,
            SUB = 3'b101;
 
-reg        Carry, Carry_nxt,
-           Overflow, Overflow_nxt,
-           Zero, Zero_nxt,
-           Negative, Negative_nxt;
+reg        Carry,
+           Overflow,
+           Zero,
+           Negative;
 
 reg [31:0] C_nxt;
 reg [7:0] CTL_out_nxt;
@@ -37,19 +37,11 @@ always @(posedge clk)
  begin
   if (!rst_n)
     begin
-      Carry_nxt <= 0;
-      Overflow_nxt <= 0;
-      Zero_nxt <= 0;
-      Negative_nxt <= 0;
       CTL_out_nxt = 8'b11111111;
       C_nxt = 32'b0;
     end
   else
     begin
-      Carry	<= Carry_nxt;
-      Overflow	<= Overflow_nxt;
-      Zero	<= Zero_nxt;
-      Negative <= Negative_nxt;
       CTL_out <= CTL_out_nxt;
       C <= C_nxt;
     end

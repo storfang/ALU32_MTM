@@ -7,6 +7,12 @@ module mtm_Alu_serializer(
   output reg sout
 );
 
+localparam IDLE = 3'b000,
+           START_BIT = 3'b001,
+           PACKET_BIT = 3'b010,
+           DATA = 3'b011,
+           STOP_BIT = 3'b100;
+           
 reg [7:0] bit_counter_nxt = 0,
           bit_counter;
 
@@ -19,11 +25,7 @@ reg [2:0] state_nxt = IDLE,
 reg [31:0] C_buff;
 reg [7:0] CTL_buff;
 
-localparam IDLE = 3'b000,
-           START_BIT = 3'b001,
-           PACKET_BIT = 3'b010,
-           DATA = 3'b011,
-           STOP_BIT = 3'b100;
+
 
 always @(posedge clk)
     begin

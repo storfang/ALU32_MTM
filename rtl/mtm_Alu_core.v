@@ -1,3 +1,4 @@
+
 module mtm_Alu_core(
 
   input wire clk,
@@ -11,7 +12,14 @@ module mtm_Alu_core(
 );
 
 wire [2:0] OP;
+
 assign OP = CTL_in[6:4];
+assign CRC = CTL_in[3:0];
+
+
+localparam RECEIVE = 2'b00,
+           SEND = 2'b01,
+           LOAD_DATA = 2'b10;
 
 localparam AND = 3'b000,
            OR = 3'b001,
@@ -42,11 +50,12 @@ end
 
 
 always @*
+	
       begin
-        Carry = 0;
-        Overflow = 0;
-        Zero = 0;
-        Negative = 0;
+Carry = 0;
+           Overflow =0;
+           Zero = 0;
+           Negative = 0;
         if( CTL_in == 8'b10100101 || CTL_in == 8'b11001001 || CTL_in == 8'b10010011)
           begin
           //$display("error data");
@@ -55,10 +64,10 @@ always @*
           end
         else if (CTL_in != 8'b11111111)
           begin
-          //$display("send %b", OP);
+         // $display("send %b", OP);
             case(OP)
               AND: C_nxt = A & B;
-              OR:  C_nxt = A | B;
+              OR: C_nxt = A | B;
               ADD:
                 begin
                   C_nxt = A + B;

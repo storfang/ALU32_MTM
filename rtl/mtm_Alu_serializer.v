@@ -56,6 +56,12 @@ end
 
 always @*
     begin
+    state_nxt = state;
+    bit_counter_nxt = bit_counter;
+    byte_counter_nxt = byte_counter;
+    C_buff_nxt = C_buff;
+    CTL_buff_nxt = CTL_buff;
+    sout_nxt = sout;
       case(state)
         IDLE:
          begin
@@ -71,7 +77,7 @@ always @*
             end
           else if (CTL_out == 8'b11001001 || CTL_out == 8'b10010011 || CTL_out == 8'b10100101)
             begin
-            $display("jestem w 2 ifie");
+            //$display("jestem w 2 ifie");
               state_nxt = START_BIT;
               byte_counter_nxt = 1;
               C_buff_nxt = C;
@@ -94,7 +100,7 @@ always @*
           end
         PACKET_BIT:
          begin
-         $display("packet bit");
+         //$display("packet bit");
 
           if (byte_counter == 1)
             begin

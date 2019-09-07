@@ -36,7 +36,7 @@ reg [2:0] state_nxt = IDLE,
           state;
 
 reg [3:0] CRC;
-reg [71:0]  Buff_nxt = 72'b111111111111111111111111111111111111111111111111111111111111111111111111,
+reg [71:0]  Buff_nxt,
             Buff;
 
 always @(posedge clk)
@@ -49,6 +49,9 @@ always @(posedge clk)
           crc_error <= 0;
           op_error <= 0;
           Buff <= 72'b111111111111111111111111111111111111111111111111111111111111111111111111;
+          A <= 32'b11111111111111111111111111111111;
+          B <= 32'b11111111111111111111111111111111;
+          CTL <= 8'b11111111;
         end
       else
         begin
@@ -66,6 +69,15 @@ always @(posedge clk)
 
 always @*
     begin
+    state_nxt = state;
+    bit_counter_nxt = bit_counter;
+    byte_counter_nxt = byte_counter;
+    Buff_nxt = Buff;
+    crc_error_nxt = crc_error;
+    op_error_nxt = op_error;
+    A_nxt = A;
+    B_nxt = B;
+    CTL_nxt = CTL;
       case(state)
         IDLE:
           begin
@@ -142,7 +154,7 @@ always @*
           byte_counter_nxt = 0;
           bit_counter_nxt = 0;
           CRC = makeCRC({Buff[71:40],Buff[39:8],1'b1,Buff[6:4]},4'b0000);
-          $display("send data   %b %b", CRC, Buff);
+          //$display("send data   %b %b", CRC, Buff);
           if (CRC == Buff[3:0])
             begin
               if (Buff[6:4]==3'b000 || Buff[6:4]==3'b001 || Buff[6:4]==3'b100 || Buff[6:4]==3'b101)
@@ -151,7 +163,7 @@ always @*
                 B_nxt = Buff[71:40];
                 A_nxt = Buff[39:8];
                 CTL_nxt = Buff[7:0];
-                $display("send data   CTL = %b POWINNO = %b", CTL_nxt, Buff[7:0]);
+                //$display("send data   CTL = %b POWINNO = %b", CTL_nxt, Buff[7:0]);
                end
               else
                begin
@@ -168,7 +180,7 @@ always @*
         end
      ERROR:
         begin
-        $display("error data");
+        //$display("error data");
           crc_error_nxt = 0;
           op_error_nxt = 0;
           state_nxt = IDLE;

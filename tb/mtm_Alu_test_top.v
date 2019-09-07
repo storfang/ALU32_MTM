@@ -3,9 +3,9 @@
  *
  * MODULE:    mtm_Alu_test_top
  * PROJECT:   PPCU_VLSI
- * AUTHOR 1:  <fill the name>
- * AUTHOR 2:  <fill the name>
- * DATE:      <last modification date>
+ * AUTHOR 1:  Mateusz Oleszkowicz
+ * AUTHOR 2:  Mikołaj Jarosławski
+ * DATE:      07.09.2019
  * 
  * DESCRIPTION: this module connects the testbench to the DUT.
  *

@@ -1,3 +1,4 @@
+
 module mtm_Alu_serializer(
   input  wire clk,
   input  wire rst_n,
@@ -53,6 +54,7 @@ always @(posedge clk)
           sout <= sout_nxt;
         end
 end
+
 
 always @*
     begin

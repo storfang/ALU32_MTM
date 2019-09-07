@@ -3,8 +3,8 @@
  *
  * MODULE:    mtm_Alu
  * PROJECT:   PPCU_VLSI
- * AUTHORS:
- * DATE:
+ * AUTHORS: Mikołaj Jarosławski, Mateusz Oleszkowicz
+ * DATE: 07.09.2019
  * ------------------------------------------------------------------------------
  * The ALU should operate as described in the mtmAlu_test_top module.
  * It should consist of three modules connected together:
@@ -22,15 +22,39 @@ module mtm_Alu (
     output wire sout   // serial data output
 );
 
-/*
+wire [31:0] A;
+wire [31:0] B;
+wire [31:0] C;
+wire [7:0] CTL;
+wire [7:0] CTL_out;
+
+
 mtm_Alu_deserializer u_mtm_Alu_deserializer(
+  .clk    (clk),
+  .rst_n  (rst_n),
+  .sin (sin),
+  .A (A),
+  .B  (B),
+  .CTL(CTL)
 );
 
 mtm_Alu_core u_mtm_Alu_core(
+  .clk    (clk),
+  .rst_n  (rst_n),
+  .A (A),
+  .B  (B),
+  .CTL_in(CTL),
+  .C(C),
+  .CTL_out(CTL_out)
 );
 
 mtm_Alu_serializer u_mtm_Alu_serializer(
+  .clk(clk),
+  .rst_n(rst_n),
+  .C(C),
+  .CTL_out(CTL_out),
+  .sout(sout)
 );
-*/
+
 
 endmodule

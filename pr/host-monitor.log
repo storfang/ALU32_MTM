@@ -1,0 +1,14 @@
+Status keys: E excellent, G good, B bad, T terrible.
+Memory values:
+  total = Real memory of host
+  progs = Real memory used by processes, including swappable cache
+  used =  Real memory used by processes, excluding swappable cache
+Started at: 19/09/08 10:38:04
+cadence212(0)    TMPDIR is : /tmp/innovus_temp_169023_cadence212_moleszkowicz_bkSp3W
+
+==============  ========  ========================  ========================
+Host            CPU         Memory (GB)             TMPDIR (GB)      (Mb/s)
+name(id)        util %    total progs used  %used   total    avail    rate
+==============  ========  ===== ===== ===== ======  ========================
+10:38:04
+cadence212(0)        4 E    251   228    39   15 E  192.12   181.25 E  N/A
